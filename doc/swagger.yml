@@ -1,0 +1,515 @@
+---
+
+swagger: '2.0'
+
+
+
+################################################################################
+
+#                              API Information                                 #
+
+################################################################################
+
+info:
+
+  version: v0.1
+
+  title: Housing API
+
+  description: |
+
+    This is the first version of housing APIs which are designed to be served 
+
+    between frontend and backend. All frontend platforms (including web, Android
+
+    , and ios) will consume the exactly same APIs with different request headers 
+
+    so that we build the APIs exactly once. Meanwhile, we will collect the 
+
+    corresponding telemetry for different platform. 
+
+
+
+    Build something great!
+
+
+
+    All endpoints are only accessible via http (only for prototype) and are located 
+
+    at `api.housing.com`. 
+
+
+
+    ## Limits
+
+    If client side is sending too many requests too quickly, we'll send back a
+
+    `503` error code (server unavailable).
+
+    Client-side is limited to 500 requests per hour per `IP` or `user-id` overall.
+
+
+
+    ## Deleting Objects
+
+    We do our best to have all our URLs be
+
+    [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer).
+
+    Every endpoint (URL) may support one of four different http verbs. GET
+
+    requests fetch information about an object, POST requests create objects,
+
+    PUT requests update objects, and finally DELETE requests will delete
+
+    objects.
+
+
+
+    ## Structure
+
+
+
+    ### The Envelope
+
+    Every response is contained by an envelope. That is, each response has a
+
+    predictable set of keys with which you can expect to interact:
+
+    ```json
+
+    {
+
+        "meta": {
+
+            "code": 200
+
+        },
+
+        "data": {
+
+            ...
+
+        },
+
+        "pagination": {
+
+            "next_url": "...",
+
+            "next_max_id": "13872296"
+
+        }
+
+    }
+
+    ```
+
+
+
+    #### META
+
+    The meta key is used to communicate extra information about the response to
+
+    the developer. If all goes well, you'll only ever see a code key with value
+
+    200. However, sometimes things go wrong, and in that case you might see a
+
+    response like:
+
+    ```json
+
+    {
+
+        "meta": {
+
+            "error_type": "OAuthException",
+
+            "code": 400,
+
+            "error_message": "..."
+
+        }
+
+    }
+
+    ```
+
+
+
+    #### DATA
+
+    The data key is the meat of the response. It may be a list or dictionary,
+
+    but either way this is where you'll find the data you requested.
+
+    #### PAGINATION
+
+    Sometimes you just can't get enough data. For this reason, we've provided a
+
+    convenient way to access more data in any request for sequential data.
+
+    Simply call the url in the next_url parameter and we'll respond with the
+
+    next set of data.
+
+    ```json
+
+    {
+
+        ...
+
+        "pagination": {
+
+            "next_url": "http://api.housing.com/v0.1/next_page?access_token=2e77d.47a0479900504cb3ab4a1f626d174d2d&max_id=13872296",
+
+            "next_max_id": "13872296"
+
+        }
+
+    }
+
+    ```
+
+    On views where pagination is present, we also support the "count" parameter.
+
+    Simply set this to the number of items you'd like to receive. Note that the
+
+    default values should be fine for most applications - but if you decide to
+
+    increase this number there is a maximum value defined on each endpoint.
+
+
+
+  termsOfService: TBD
+
+
+
+################################################################################
+
+#                  Host, Base Path, Schemes and Content Types                  #
+
+################################################################################
+
+host: api.housing.com
+
+basePath: /v0.1
+
+schemes:
+
+  - http
+
+produces:
+
+  - application/json
+
+consumes:
+
+  - application/json
+
+
+
+################################################################################
+
+#                                   Tags                                       #
+
+################################################################################
+
+tags:
+
+  - name: User
+
+  - name: Property
+
+  - name: Location
+
+
+
+################################################################################
+
+#                                   Parameters                                 #
+
+################################################################################
+
+parameters:
+
+  user-id:
+
+    name: user-id
+
+    in: path
+
+    description: The user identifier number
+
+    type: number
+
+    required: true
+
+  tag-name:
+
+    name: tag-name
+
+    in: path
+
+    description: Tag name
+
+    type: string
+
+    required: true
+
+
+
+################################################################################
+
+#                                           Paths                              #
+
+################################################################################
+
+paths:
+
+  /users:
+
+    post:
+
+      tags:
+
+        - User
+
+      description: Create user
+
+      consumes:
+
+        - application/json
+
+      produces:
+
+        - application/json
+
+      parameters:
+
+        - in: body
+
+          name: body
+
+          description: User object that needs to be created
+
+          required: true
+
+          schema:
+
+            $ref: '#/definitions/PostUser'
+
+      responses:
+
+        200:
+
+          description: The user object
+
+          schema:
+
+            type: object
+
+            properties:
+
+              data:
+
+                $ref: '#/definitions/User'
+
+  /users/forget_password:
+
+    get:
+
+      tags:
+
+        - User
+
+      description: Generate a forget password link for user to reset the password
+
+      parameters:
+
+        - in: query
+
+          name: email
+
+          description: The login email 
+
+          required: true
+
+          type: string
+
+      responses:
+
+        200:
+
+          description: successfule operation
+
+        400:
+
+          description: Invalid email
+
+  /login:
+
+    post:
+
+      tags:
+
+        - User
+
+      description: User login
+
+      produces:
+
+        - application/json
+
+      parameters:
+
+        - in: body
+
+          name: body
+
+          description: login object for email and password
+
+          required: true
+
+          schema:
+
+            type: object
+
+            properties:
+
+              email:
+
+                type: string
+
+              password:
+
+                type: string
+
+      responses:
+
+        200:
+
+          description: successfule operation
+
+          schema:
+
+            type: object
+
+            properties:
+
+              data:
+
+                $ref: '#/definitions/User'
+
+        500:
+
+          description: Login fail
+
+          schema:
+
+            type: object
+
+            properties:
+
+              error_details:
+
+                type: string
+
+
+
+################################################################################
+
+#                                 Definitions                                  #
+
+################################################################################
+
+definitions:
+
+  PostUser:
+
+    type: object
+
+    properties:
+
+      username:
+
+        type: string
+
+      firstname:
+
+        type: string
+
+      lastname:
+
+        type: string
+
+      email:
+
+        type: string
+
+      password:
+
+        type: string
+
+      phone:
+
+        type: string
+
+
+
+  User:
+
+    type: object
+
+    properties:
+
+      id:
+
+        type: string
+
+      email:
+
+        type: string
+
+      location:
+
+        type: string
+
+      favoriates:
+
+        type: array
+
+        items:
+
+          type: string
+
+      dislikes:
+
+        type: array
+
+        items:
+
+          type: string
+
+  
+
+  Location:
+
+    type: object
+
+    properties:
+
+      id:
+
+        type: string
+
+      name:
+
+        type: string
+
+      latitude:
+
+        type: number
+
+      longitude:
+
+        type: number
