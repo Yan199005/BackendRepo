@@ -722,7 +722,9 @@ definitions:
         type: object
   
       status:
-  
+
+        description: status can be active, pending (Offer accepted), and closed (The property is not for sale). That represents the current status of property.
+
         type: string
   
       size:
