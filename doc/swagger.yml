@@ -414,9 +414,193 @@ paths:
               error_details:
 
                 type: string
+  
 
+  /user/operation:
+    put:
+      tags:
+        
+        - Property
+        
+        - User
+        
+      summary: User's operation on a property 
+      
+      consumes:
 
+        - application/json
 
+      produces:
+
+        - application/json
+      
+      parameters:
+        
+        - in: body
+        
+          name: body
+
+          description: User's operation on a property
+
+          required: true
+
+          schema:
+
+            type: object
+
+            properties:
+            
+              operation:
+                
+                description: valid operation include favourite and cross_out
+                
+                type: string
+
+              user_id:
+
+                type: string
+
+              property_id:
+
+                type: number
+                
+      responses:
+
+        200:
+
+          description: successfule operation
+
+          schema:
+
+            type: object
+
+            properties:
+
+              data:
+
+                $ref: '#/definitions/User'
+        
+        500:
+
+          description: Operation fail
+
+          schema:
+
+            type: object
+
+            properties:
+
+              error_details:
+
+                type: string
+  
+  
+  /properties/{propertyId}:
+  
+    get:
+  
+      tags:
+  
+        - Property
+  
+      summary: Find property by id
+
+      produces:
+  
+        - application/json
+        
+      parameters:
+  
+        - in: path
+  
+          name: propertyId
+  
+          description: ID of the property that needs to be fetched
+  
+          required: true
+  
+          type: integer
+  
+          format: int64
+      
+      responses:
+      
+        200:
+      
+          description: successful request
+      
+          schema:
+      
+            type: object
+      
+            properties:
+      
+              data:
+      
+                $ref: '#/definitions/Property'
+      
+        404:
+      
+          description: property not found
+      
+        400:
+      
+          description: invalid id supplied
+      
+      
+  /properties/searchByLocation:
+    
+    get:
+      
+      tags:
+      
+        - Property
+        - Location
+        
+      summary: Find property by location
+      
+      consumes:
+
+        - application/json
+
+      produces:
+
+        - application/json
+
+      parameters:
+
+        - in: body
+
+          name: body
+
+          description: Location object which is nearby
+
+          required: true
+
+          schema:
+
+            $ref: '#/definitions/Location'
+          
+      responses:
+        
+        200:
+    
+          description: successful request
+      
+          schema:
+      
+            type: array
+      
+            items:
+              
+              type: string
+      
+        404:
+      
+          description: property not found
+      
+
+        
 ################################################################################
 
 #                                 Definitions                                  #
@@ -473,7 +657,11 @@ definitions:
 
       location:
 
-        type: string
+        type: array
+        
+        items:
+          
+          type: string
 
       favoriates:
 
@@ -499,10 +687,6 @@ definitions:
 
     properties:
 
-      id:
-
-        type: string
-
       name:
 
         type: string
@@ -514,3 +698,51 @@ definitions:
       longitude:
 
         type: number
+        
+      filter:
+        
+        description: filter is used to specify a combination of filters we want to add onto the location. it can be like beds>3&bath>2, which means it only return filtered results of more than three beds and more than two bathes homes. Note this filter can also change as we go on as it might take too much computing power for backend server and we might want frontend to implement this filter.
+        
+        type: string
+
+  
+
+  Property:
+  
+    type: object
+  
+    properties:
+  
+      id:
+  
+        type: string
+  
+      location:
+  
+        type: object
+  
+      status:
+
+        description: status can be active, pending (Offer accepted), and closed (The property is not for sale). That represents the current status of property.
+
+        type: string
+  
+      size:
+  
+        type: number
+  
+      beds:
+  
+        type: number
+  
+      bath:
+  
+        type: number
+  
+      price:
+        
+        type: number
+        
+      detail_info:
+
+        type: object
