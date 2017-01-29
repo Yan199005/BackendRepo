@@ -314,6 +314,8 @@ paths:
               data:
 
                 $ref: '#/definitions/User'
+        400:
+          description: email exist
 
   /users/forget_password:
 
